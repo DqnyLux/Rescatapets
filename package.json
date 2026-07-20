@@ -1,0 +1,23 @@
+{
+  "name": "rescatapet-ec",
+  "version": "1.0.0",
+  "description": "Backend API para RescataPet EC",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "bullmq": "^5.80.9",
+    "express": "^4.22.2",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prisma": "^5.10.2"
+  }
+}
