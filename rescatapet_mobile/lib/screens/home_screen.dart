@@ -1,7 +1,17 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/reporte.dart';
 import '../services/api_service.dart';
+
+enum EstiloDiseno {
+  glassmorphism,
+  bentoGrid,
+  neumorfismo,
+  neoBrutalism,
+  modoOscuro,
+  spatial3D,
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  EstiloDiseno _estiloActual = EstiloDiseno.glassmorphism;
   late Future<List<Reporte>> _futureReportes;
   String _searchQuery = '';
   String _filtroCategoria = 'Todos';
@@ -57,6 +68,67 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _mostrarSelectorEstilos() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '🎨 Seleccionar Estilo Visual de UI',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Alterna en tiempo real entre los principales paradigmas de diseño:',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildOpcionEstilo(EstiloDiseno.glassmorphism, '🔮 Glassmorphism'),
+                  _buildOpcionEstilo(EstiloDiseno.bentoGrid, '🍱 Bento Grid'),
+                  _buildOpcionEstilo(EstiloDiseno.neumorfismo, '🔲 Neumorfismo'),
+                  _buildOpcionEstilo(EstiloDiseno.neoBrutalism, '⚡ Neo-Brutalism'),
+                  _buildOpcionEstilo(EstiloDiseno.modoOscuro, '🌙 Modo Oscuro'),
+                  _buildOpcionEstilo(EstiloDiseno.spatial3D, '🌌 Spatial UI 3D'),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOpcionEstilo(EstiloDiseno estilo, String label) {
+    final isSelected = _estiloActual == estilo;
+    return ChoiceChip(
+      selected: isSelected,
+      label: Text(label),
+      selectedColor: const Color(0xFF0D9488),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Colors.black87,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _estiloActual = estilo;
+          });
+          Navigator.pop(context);
+        }
+      },
+    );
+  }
+
   void _mostrarDetalleMascota(Reporte reporte) {
     showModalBottomSheet(
       context: context,
@@ -92,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(24),
                     child: Image.network(
                       reporte.imagenUrl,
-                      height: 250,
+                      height: 240,
                       width: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
@@ -125,16 +197,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
                             ),
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.amber.withValues(alpha: 0.35),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              )
-                            ],
                           ),
                           child: Text(
-                            ' Recompensa ${reporte.recompensa}',
+                            ' ${reporte.recompensa}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -338,6 +403,77 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _mostrarGaleriaTelefono(Function(String) onImagenSeleccionada) {
+    final fotosLocalesTel = [
+      'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=800&q=80',
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.photo_library_rounded, color: Color(0xFF0D9488)),
+                  SizedBox(width: 10),
+                  Text(
+                    'Galería del Teléfono (Simulada)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Selecciona una foto capturada con la cámara o almacenada en el dispositivo:',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: fotosLocalesTel.length,
+                itemBuilder: (context, index) {
+                  final img = fotosLocalesTel[index];
+                  return GestureDetector(
+                    onTap: () {
+                      onImagenSeleccionada(img);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Foto cargada correctamente desde el almacenamiento del teléfono.'),
+                          backgroundColor: Color(0xFF0D9488),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(img, fit: BoxFit.cover),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _mostrarDialogoNuevoReporte() {
     final mascotaCtrl = TextEditingController();
     String especieSeleccionada = 'Perro';
@@ -349,13 +485,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final recompensaCtrl = TextEditingController();
     String imagenSeleccionada = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80';
 
-    final opcionesImagenes = [
-      'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80',
-    ];
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -364,8 +493,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return DraggableScrollableSheet(
-              initialChildSize: 0.9,
-              maxChildSize: 0.95,
+              initialChildSize: 0.92,
+              maxChildSize: 0.96,
               minChildSize: 0.6,
               builder: (context, scrollController) {
                 return Container(
@@ -400,49 +529,42 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Cualquier usuario puede publicar un reporte libremente.',
+                        'Publicación directa desde el celular sin restricciones.',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const SizedBox(height: 20),
-                      const Text('1. Seleccionar Foto de la Mascota:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text('1. Foto desde el Teléfono:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       const SizedBox(height: 10),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.network(
-                          imagenSeleccionada,
-                          height: 160,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 70,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: opcionesImagenes.length,
-                          itemBuilder: (context, index) {
-                            final img = opcionesImagenes[index];
-                            final isSel = img == imagenSeleccionada;
-                            return GestureDetector(
-                              onTap: () => setModalState(() => imagenSeleccionada = img),
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: isSel ? const Color(0xFF0D9488) : Colors.transparent,
-                                    width: 3,
-                                  ),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(11),
-                                  child: Image.network(img, width: 70, height: 70, fit: BoxFit.cover),
-                                ),
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.network(
+                              imagenSeleccionada,
+                              height: 170,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                _mostrarGaleriaTelefono((nuevaImg) {
+                                  setModalState(() => imagenSeleccionada = nuevaImg);
+                                });
+                              },
+                              icon: const Icon(Icons.photo_camera_rounded, size: 18),
+                              label: const Text('Abrir Galería / Cámara'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0D9488),
+                                foregroundColor: Colors.white,
+                                elevation: 4,
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       const Text('2. Datos Generales:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -581,31 +703,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = _estiloActual == EstiloDiseno.modoOscuro;
+    final bgBackgroundColor = isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF3F4F6);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: bgBackgroundColor,
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.pets_rounded, color: Colors.white, size: 26),
-            SizedBox(width: 10),
+            const Icon(Icons.pets_rounded, color: Colors.white, size: 26),
+            const SizedBox(width: 10),
             Text(
               'RescataPet EC',
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 22, letterSpacing: 0.5),
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                color: isDarkMode ? const Color(0xFF38BDF8) : Colors.white,
+              ),
             ),
           ],
         ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF059669)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              colors: isDarkMode
+                  ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                  : [const Color(0xFF0F766E), const Color(0xFF0D9488)],
             ),
           ),
         ),
         foregroundColor: Colors.white,
         elevation: 6,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.palette_rounded),
+            onPressed: _mostrarSelectorEstilos,
+            tooltip: 'Cambiar Estilo UI',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _cargarReportes,
@@ -645,53 +779,42 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           : null,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            )
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          selectedItemColor: const Color(0xFF0D9488),
-          unselectedItemColor: Colors.grey.shade500,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_rounded),
-              activeIcon: Icon(Icons.grid_view_rounded, size: 28),
-              label: 'Mascotas',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.verified_user_rounded),
-              activeIcon: Icon(Icons.verified_user_rounded, size: 28),
-              label: 'Diagnóstico API',
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        selectedItemColor: const Color(0xFF0D9488),
+        unselectedItemColor: Colors.grey.shade500,
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        elevation: 10,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view_rounded),
+            label: 'Mascotas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.verified_user_rounded),
+            label: 'Diagnóstico API',
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildReportesTab() {
+    final isDarkMode = _estiloActual == EstiloDiseno.modoOscuro;
+
     return Column(
       children: [
         Container(
           width: double.infinity,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              colors: isDarkMode
+                  ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                  : [const Color(0xFF0F766E), const Color(0xFF0D9488)],
             ),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
           ),
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
           child: Column(
@@ -701,25 +824,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: (val) => setState(() => _searchQuery = val),
                 decoration: InputDecoration(
                   hintText: 'Buscar mascota, raza o ciudad...',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                   prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0D9488)),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.cancel_rounded, color: Colors.grey),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: isDarkMode ? const Color(0xFF334155) : Colors.white,
+                  hintStyle: TextStyle(color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
                   contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
                   ),
                 ),
+                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
               ),
               const SizedBox(height: 14),
               SingleChildScrollView(
@@ -745,52 +860,14 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: Color(0xFF0D9488)),
-                      SizedBox(height: 16),
-                      Text('Obteniendo catálogo en vivo de la API RescataPet EC...'),
-                    ],
-                  ),
+                  child: CircularProgressIndicator(color: Color(0xFF0D9488)),
                 );
               } else if (snapshot.hasError) {
                 return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.wifi_off_rounded, color: Colors.redAccent, size: 64),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Fallo de Conexión HTTP',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.grey, fontSize: 13),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: _cargarReportes,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Reintentar Conexión'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0D9488),
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
                 );
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(
-                  child: Text('No hay reportes de mascotas registrados.'),
-                );
+                return const Center(child: Text('No hay reportes de mascotas.'));
               }
 
               final reportes = snapshot.data!.where((r) {
@@ -816,182 +893,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: reportes.length,
                   itemBuilder: (context, index) {
                     final reporte = reportes[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.06),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          )
-                        ],
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => _mostrarDetalleMascota(reporte),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Stack(
-                              children: [
-                                Image.network(
-                                  reporte.imagenUrl,
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      height: 200,
-                                      color: Colors.teal.shade50,
-                                      child: const Center(
-                                        child: Icon(Icons.pets, size: 60, color: Color(0xFF0D9488)),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                Positioned(
-                                  top: 14,
-                                  right: 14,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.65),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      reporte.estado,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 14,
-                                  left: 14,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: reporte.esVerificado ? const Color(0xFF059669) : const Color(0xFFD97706),
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.2),
-                                          blurRadius: 4,
-                                        )
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          reporte.esVerificado ? Icons.verified_user_rounded : Icons.gpp_maybe_rounded,
-                                          color: Colors.white,
-                                          size: 14,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          reporte.esVerificado ? 'Verificado' : 'No Verificado',
-                                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          reporte.mascota,
-                                          style: const TextStyle(
-                                            fontSize: 21,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1F2937),
-                                          ),
-                                        ),
-                                      ),
-                                      if (reporte.recompensa != null)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFFEF3C7),
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: const Color(0xFFF59E0B)),
-                                          ),
-                                          child: Text(
-                                            ' ${reporte.recompensa!}',
-                                            style: const TextStyle(
-                                              color: Color(0xFFB45309),
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${reporte.especie} • ${reporte.raza}',
-                                    style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 13),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on_rounded, size: 16, color: Colors.redAccent),
-                                      const SizedBox(width: 4),
-                                      Text(reporte.ubicacion, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    reporte.descripcion,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(color: Color(0xFF4B5563), fontSize: 13, height: 1.4),
-                                  ),
-                                  const SizedBox(height: 14),
-                                  const Divider(height: 1),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.phone_in_talk_rounded, size: 16, color: Color(0xFF0D9488)),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        reporte.telefonoPrincipal,
-                                        style: const TextStyle(
-                                          color: Color(0xFF0D9488),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      TextButton.icon(
-                                        onPressed: () => _mostrarDetalleMascota(reporte),
-                                        icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                                        label: const Text('Ver Ficha'),
-                                        style: TextButton.styleFrom(foregroundColor: const Color(0xFF0D9488)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    return _buildTarjetaSegunEstilo(reporte, index);
                   },
                 ),
               );
@@ -1002,21 +904,264 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildTarjetaSegunEstilo(Reporte reporte, int index) {
+    switch (_estiloActual) {
+      case EstiloDiseno.glassmorphism:
+        return _buildTarjetaGlassmorphism(reporte);
+      case EstiloDiseno.bentoGrid:
+        return _buildTarjetaBentoGrid(reporte);
+      case EstiloDiseno.neumorfismo:
+        return _buildTarjetaNeumorfismo(reporte);
+      case EstiloDiseno.neoBrutalism:
+        return _buildTarjetaNeoBrutalism(reporte);
+      case EstiloDiseno.modoOscuro:
+        return _buildTarjetaModoOscuro(reporte);
+      case EstiloDiseno.spatial3D:
+        return _buildTarjetaSpatial3D(reporte, index);
+    }
+  }
+
+  Widget _buildTarjetaGlassmorphism(Reporte reporte) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.teal.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: InkWell(
+            onTap: () => _mostrarDetalleMascota(reporte),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Image.network(reporte.imagenUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(reporte.mascota, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text('${reporte.especie} • ${reporte.raza}', style: const TextStyle(color: Color(0xFF0D9488))),
+                      const SizedBox(height: 6),
+                      Text('Contacto: ${reporte.telefonoPrincipal}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTarjetaBentoGrid(Reporte reporte) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
+        onTap: () => _mostrarDetalleMascota(reporte),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(reporte.imagenUrl, height: 120, fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(reporte.mascota, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('${reporte.especie} • ${reporte.raza}', style: const TextStyle(fontSize: 12, color: Colors.teal)),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.teal.shade50, borderRadius: BorderRadius.circular(12)),
+                        child: Text('📍 ${reporte.ubicacion}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTarjetaNeumorfismo(Reporte reporte) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(color: Colors.white, offset: Offset(-6, -6), blurRadius: 10),
+          BoxShadow(color: Color(0xFFD1D5DB), offset: Offset(6, 6), blurRadius: 10),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => _mostrarDetalleMascota(reporte),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(reporte.imagenUrl, width: 90, height: 90, fit: BoxFit.cover),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(reporte.mascota, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text('Tel: ${reporte.telefonoPrincipal}', style: const TextStyle(color: Color(0xFF0D9488))),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTarjetaNeoBrutalism(Reporte reporte) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade100,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black, width: 3),
+        boxShadow: const [
+          BoxShadow(color: Colors.black, offset: Offset(6, 6)),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => _mostrarDetalleMascota(reporte),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(reporte.imagenUrl, height: 160, width: double.infinity, fit: BoxFit.cover),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    reporte.mascota.toUpperCase(),
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black),
+                  ),
+                  Text('CONTACTO: ${reporte.telefonoPrincipal}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTarjetaModoOscuro(Reporte reporte) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF334155)),
+      ),
+      child: InkWell(
+        onTap: () => _mostrarDetalleMascota(reporte),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(reporte.imagenUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(reporte.mascota, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text('${reporte.especie} • ${reporte.raza}', style: const TextStyle(color: Color(0xFF38BDF8))),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTarjetaSpatial3D(Reporte reporte, int index) {
+    return Transform(
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, 0.001)
+        ..rotateX(0.04)
+        ..rotateY(-0.02),
+      alignment: FractionalOffset.center,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.teal.withValues(alpha: 0.25),
+              blurRadius: 20,
+              offset: const Offset(0, 12),
+            )
+          ],
+        ),
+        child: InkWell(
+          onTap: () => _mostrarDetalleMascota(reporte),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.network(reporte.imagenUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(reporte.mascota, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildChipFiltro(String label, IconData icono) {
     final isSelected = _filtroCategoria == label;
     return FilterChip(
       selected: isSelected,
       avatar: Icon(icono, size: 16, color: isSelected ? const Color(0xFF0F766E) : Colors.white),
       label: Text(label),
-      labelStyle: TextStyle(
-        color: isSelected ? const Color(0xFF0F766E) : Colors.white,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
       selectedColor: Colors.white,
       backgroundColor: Colors.white.withValues(alpha: 0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      side: BorderSide.none,
       onSelected: (selected) {
         setState(() {
           _filtroCategoria = label;
@@ -1033,7 +1178,6 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Card(
             color: const Color(0xFFCCFBF1),
-            elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
