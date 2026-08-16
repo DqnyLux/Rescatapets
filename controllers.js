@@ -2,8 +2,26 @@ const { Reporte, Usuario } = require('./models');
 const { Queue } = require('bullmq');
 const Redis = require('ioredis');
 
-const redisClient = new Redis({ host: '127.0.0.1', port: 6379 });
-const alertasQueue = new Queue('alertas', { connection: { host: '127.0.0.1', port: 6379 } });
+const redisClient = new Redis({
+  host: '127.0.0.1',
+  port: 6379,
+  maxRetriesPerRequest: null,
+  enableOfflineQueue: false,
+  retryStrategy(times) {
+    if (times > 1) return null;
+    return 2000;
+  }
+});
+
+redisClient.on('error', (err) => {
+  // Ignorar errores repetitivos si Redis no está ejecutándose en local
+});
+
+const alertasQueue = new Queue('alertas', {
+  connection: { host: '127.0.0.1', port: 6379, maxRetriesPerRequest: null, enableOfflineQueue: false }
+});
+
+alertasQueue.on('error', () => {});
 
 const getReportes = async (req, res) => {
   try {
@@ -23,20 +41,26 @@ const getReportes = async (req, res) => {
 
 const getReportesPublicos = async (req, res) => {
   const CACHE_KEY = 'reportes_publicos';
-  
-  try {
-    // Estrategia Cache-Aside: Consulta Redis primero
-    const cacheData = await redisClient.get(CACHE_KEY);
-    if (cacheData) {
-      console.log('Respondiendo desde Redis (Caché Hit)');
-      return res.json(JSON.parse(cacheData));
-    }
 
-    // Cache Miss: Consulta BD y guarda en Redis con TTL (60s)
+  try {
+    if (redisClient.status === 'ready') {
+      const cacheData = await redisClient.get(CACHE_KEY);
+      if (cacheData) {
+        console.log('Respondiendo desde Redis (Caché Hit)');
+        return res.json(JSON.parse(cacheData));
+      }
+    }
+  } catch (err) {
+    // Redis no disponible, continuar con BD
+  }
+
+  try {
     console.log('Respondiendo desde BD (Cache Miss)');
     const reportes = await Reporte.findAll({ where: { estado: 'PUBLICO' } });
 
-    await redisClient.setex(CACHE_KEY, 60, JSON.stringify(reportes));
+    if (redisClient.status === 'ready') {
+      await redisClient.setex(CACHE_KEY, 60, JSON.stringify(reportes)).catch(() => {});
+    }
 
     res.json(reportes);
   } catch (error) {

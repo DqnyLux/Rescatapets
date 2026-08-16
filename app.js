@@ -8,6 +8,17 @@ require('./worker');
 const app = express();
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: 'API RescataPet EC en funcionamiento',
+    endpoints: {
+      reportes_publicos: 'GET /api/reportes/publicos',
+      login: 'POST /api/login'
+    }
+  });
+});
+
 app.post('/api/login', async (req, res) => {
   const { email } = req.body;
   const usuario = await Usuario.findOne({ where: { email } });
