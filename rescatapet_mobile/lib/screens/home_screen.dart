@@ -574,14 +574,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(
                         height: 52,
                         child: ElevatedButton.icon(
-                          onPressed: () {
+                          onPressed: () async {
+                            final nombreMascota = mascotaCtrl.text.trim().isEmpty ? 'Mascota Perdidita' : mascotaCtrl.text.trim();
+                            final lugar = ubicacionCtrl.text.trim().isEmpty ? 'Quito, Ecuador' : ubicacionCtrl.text.trim();
+
+                            final messenger = ScaffoldMessenger.of(context);
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(' Reporte de mascota publicado exitosamente en RescataPet EC.'),
-                                backgroundColor: Color(0xFF0D9488),
-                              ),
-                            );
+                            try {
+                              await ApiService.crearReporte(
+                                mascota: '$nombreMascota ($especieSeleccionada)',
+                                ubicacion: lugar,
+                                estado: 'PUBLICO',
+                              );
+                              _cargarReportes();
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text(' Reporte de mascota publicado exitosamente en la API y base de datos.'),
+                                  backgroundColor: Color(0xFF0D9488),
+                                ),
+                              );
+                            } catch (e) {
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Text('Error al enviar a la API: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           },
                           icon: const Icon(Icons.cloud_upload_rounded),
                           label: const Text('Publicar Reporte de Mascota', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

@@ -10,7 +10,7 @@ class ApiService {
 
   static Future<List<Reporte>> fetchReportesPublicos() async {
     final url = Uri.parse('$baseUrl/reportes/publicos');
-    
+
     try {
       final response = await http.get(url).timeout(
         const Duration(seconds: 10),
@@ -24,6 +24,31 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Fallo al conectar con la API ($baseUrl): $e');
+    }
+  }
+
+  static Future<void> crearReporte({
+    required String mascota,
+    required String ubicacion,
+    required String estado,
+  }) async {
+    final url = Uri.parse('$baseUrl/reportes/publicos');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'mascota': mascota,
+          'ubicacion': ubicacion,
+          'estado': estado,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Error al guardar reporte: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Fallo al conectar con la API para publicar: $e');
     }
   }
 

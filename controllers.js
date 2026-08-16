@@ -87,4 +87,25 @@ const crearReporte = async (req, res) => {
   }
 };
 
-module.exports = { getReportes, getReportesPublicos, crearReporte };
+const crearReportePublico = async (req, res) => {
+  const { mascota, ubicacion, estado } = req.body;
+
+  try {
+    const nuevoReporte = await Reporte.create({
+      mascota: mascota || 'Mascota Extraviada',
+      ubicacion: ubicacion || 'Ecuador',
+      estado: estado || 'PUBLICO',
+      usuarioId: 1
+    });
+
+    if (redisClient.status === 'ready') {
+      await redisClient.del('reportes_publicos').catch(() => {});
+    }
+
+    res.status(201).json({ mensaje: 'Reporte creado exitosamente', reporte: nuevoReporte });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { getReportes, getReportesPublicos, crearReporte, crearReportePublico };
