@@ -1,17 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/reporte.dart';
 import '../services/api_service.dart';
-
-enum EstiloDiseno {
-  glassmorphism,
-  bentoGrid,
-  neumorfismo,
-  neoBrutalism,
-  modoOscuro,
-  spatial3D,
-}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  EstiloDiseno _estiloActual = EstiloDiseno.glassmorphism;
+  bool _isDarkMode = false;
   late Future<List<Reporte>> _futureReportes;
   String _searchQuery = '';
   String _filtroCategoria = 'Todos';
@@ -68,68 +58,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _mostrarSelectorEstilos() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '🎨 Seleccionar Estilo Visual de UI',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Alterna en tiempo real entre los principales paradigmas de diseño:',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildOpcionEstilo(EstiloDiseno.glassmorphism, '🔮 Glassmorphism'),
-                  _buildOpcionEstilo(EstiloDiseno.bentoGrid, '🍱 Bento Grid'),
-                  _buildOpcionEstilo(EstiloDiseno.neumorfismo, '🔲 Neumorfismo'),
-                  _buildOpcionEstilo(EstiloDiseno.neoBrutalism, '⚡ Neo-Brutalism'),
-                  _buildOpcionEstilo(EstiloDiseno.modoOscuro, '🌙 Modo Oscuro'),
-                  _buildOpcionEstilo(EstiloDiseno.spatial3D, '🌌 Spatial UI 3D'),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildOpcionEstilo(EstiloDiseno estilo, String label) {
-    final isSelected = _estiloActual == estilo;
-    return ChoiceChip(
-      selected: isSelected,
-      label: Text(label),
-      selectedColor: const Color(0xFF0D9488),
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      onSelected: (selected) {
-        if (selected) {
-          setState(() {
-            _estiloActual = estilo;
-          });
-          Navigator.pop(context);
-        }
-      },
-    );
-  }
-
   void _mostrarDetalleMascota(Reporte reporte) {
+    final textColor = _isDarkMode ? Colors.white : const Color(0xFF1F2937);
+    final subtextColor = _isDarkMode ? Colors.grey.shade300 : const Color(0xFF4B5563);
+    final cardBgColor = _isDarkMode ? const Color(0xFF1E293B) : Colors.white;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -141,9 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
           minChildSize: 0.5,
           builder: (context, scrollController) {
             return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
+              decoration: BoxDecoration(
+                color: cardBgColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
               ),
               child: ListView(
                 controller: scrollController,
@@ -155,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 5,
                       margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: Colors.grey.shade400,
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -170,8 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           height: 220,
-                          color: Colors.teal.shade50,
-                          child: Icon(Icons.pets, size: 80, color: Colors.teal.shade300),
+                          color: const Color(0xFF0F766E).withValues(alpha: 0.2),
+                          child: const Icon(Icons.pets, size: 80, color: Color(0xFF0D9488)),
                         );
                       },
                     ),
@@ -182,10 +115,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           reporte.mascota,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
-                            color: Color(0xFF1F2937),
+                            color: textColor,
                           ),
                         ),
                       ),
@@ -215,13 +148,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFCCFBF1),
+                          color: const Color(0xFF0D9488).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           '${reporte.especie} • ${reporte.raza}',
                           style: const TextStyle(
-                            color: Color(0xFF0F766E),
+                            color: Color(0xFF2DD4BF),
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -231,12 +164,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: _isDarkMode ? const Color(0xFF334155) : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           ' Extraviado: ${reporte.fecha}',
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          style: TextStyle(color: subtextColor, fontSize: 12),
                         ),
                       ),
                     ],
@@ -248,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 6),
                       Text(
                         reporte.ubicacion,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF374151)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
                       ),
                     ],
                   ),
@@ -256,17 +189,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: reporte.esVerificado ? const Color(0xFFECFDF5) : const Color(0xFFFFFBEB),
+                      color: reporte.esVerificado
+                          ? (_isDarkMode ? const Color(0xFF064E3B) : const Color(0xFFECFDF5))
+                          : (_isDarkMode ? const Color(0xFF78350F) : const Color(0xFFFFFBEB)),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: reporte.esVerificado ? const Color(0xFFA7F3D0) : const Color(0xFFFDE68A),
+                        color: reporte.esVerificado ? const Color(0xFF059669) : const Color(0xFFD97706),
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           reporte.esVerificado ? Icons.verified_user_rounded : Icons.gpp_maybe_rounded,
-                          color: reporte.esVerificado ? const Color(0xFF059669) : const Color(0xFFD97706),
+                          color: reporte.esVerificado ? const Color(0xFF34D399) : const Color(0xFFFBBF24),
                           size: 26,
                         ),
                         const SizedBox(width: 12),
@@ -279,17 +214,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
-                                  color: reporte.esVerificado ? const Color(0xFF065F46) : const Color(0xFF92400E),
+                                  color: reporte.esVerificado ? const Color(0xFF6EE7B7) : const Color(0xFFFDE68A),
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 reporte.esVerificado
                                     ? 'Perfil validado con cédula y correo institucional en RescataPet EC.'
-                                    : 'Publicado abiertamente sin verificación de perfil. Verificar identidad antes de concretar recompensa.',
+                                    : 'Publicado abiertamente sin verificación de perfil. Verificar identidad antes de entregar recompensas.',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: reporte.esVerificado ? const Color(0xFF047857) : const Color(0xFFB45309),
+                                  color: _isDarkMode ? Colors.grey.shade300 : Colors.black87,
                                 ),
                               ),
                             ],
@@ -299,27 +234,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  const Text(
+                  Text(
                     'Descripción de la Mascota',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
+                      color: _isDarkMode ? const Color(0xFF334155) : const Color(0xFFF9FAFB),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: _isDarkMode ? const Color(0xFF475569) : Colors.grey.shade200),
                     ),
                     child: Text(
                       reporte.descripcion,
-                      style: const TextStyle(fontSize: 14, height: 1.6, color: Color(0xFF4B5563)),
+                      style: TextStyle(fontSize: 14, height: 1.6, color: textColor),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Números de Contacto',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: textColor),
                   ),
                   const SizedBox(height: 14),
                   _buildBotonContacto(
@@ -356,9 +291,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -372,10 +307,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(titulo, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Text(titulo, style: TextStyle(fontSize: 11, color: _isDarkMode ? Colors.grey.shade400 : Colors.grey.shade700)),
                 Text(
                   numero,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _isDarkMode ? Colors.white : color),
                 ),
               ],
             ),
@@ -412,9 +347,13 @@ class _HomeScreenState extends State<HomeScreen> {
       'https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=800&q=80',
     ];
 
+    final sheetBg = _isDarkMode ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = _isDarkMode ? Colors.white : const Color(0xFF1F2937);
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      backgroundColor: sheetBg,
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(20),
@@ -422,20 +361,20 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.photo_library_rounded, color: Color(0xFF0D9488)),
-                  SizedBox(width: 10),
+                  const Icon(Icons.photo_library_rounded, color: Color(0xFF0D9488)),
+                  const SizedBox(width: 10),
                   Text(
-                    'Galería del Teléfono (Simulada)',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    'Galería de Fotos del Teléfono',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Selecciona una foto capturada con la cámara o almacenada en el dispositivo:',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              Text(
+                'Selecciona la imagen de la mascota guardada en la galería de tu dispositivo:',
+                style: TextStyle(fontSize: 12, color: _isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
               ),
               const SizedBox(height: 16),
               GridView.builder(
@@ -455,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Foto cargada correctamente desde el almacenamiento del teléfono.'),
+                          content: Text('Foto seleccionada exitosamente desde la Galería.'),
                           backgroundColor: Color(0xFF0D9488),
                         ),
                       );
@@ -485,6 +424,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final recompensaCtrl = TextEditingController();
     String imagenSeleccionada = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80';
 
+    final modalBg = _isDarkMode ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = _isDarkMode ? Colors.white : const Color(0xFF1F2937);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -498,9 +440,9 @@ class _HomeScreenState extends State<HomeScreen> {
               minChildSize: 0.6,
               builder: (context, scrollController) {
                 return Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                  decoration: BoxDecoration(
+                    color: modalBg,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                   ),
                   child: ListView(
                     controller: scrollController,
@@ -512,28 +454,28 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 5,
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
+                            color: Colors.grey.shade400,
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.add_a_photo_rounded, color: Color(0xFF0D9488), size: 28),
-                          SizedBox(width: 10),
+                          const Icon(Icons.add_a_photo_rounded, color: Color(0xFF0D9488), size: 28),
+                          const SizedBox(width: 10),
                           Text(
                             'Reportar Mascota',
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Publicación directa desde el celular sin restricciones.',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        'Publicación abierta para la comunidad de RescataPet EC.',
+                        style: TextStyle(fontSize: 12, color: _isDarkMode ? Colors.grey.shade400 : Colors.grey),
                       ),
                       const SizedBox(height: 20),
-                      const Text('1. Foto desde el Teléfono:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text('1. Foto desde la Galería:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
                       const SizedBox(height: 10),
                       Stack(
                         alignment: Alignment.bottomRight,
@@ -555,8 +497,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setModalState(() => imagenSeleccionada = nuevaImg);
                                 });
                               },
-                              icon: const Icon(Icons.photo_camera_rounded, size: 18),
-                              label: const Text('Abrir Galería / Cámara'),
+                              icon: const Icon(Icons.photo_library_rounded, size: 18),
+                              label: const Text('Abrir Galería de Fotos'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF0D9488),
                                 foregroundColor: Colors.white,
@@ -567,21 +509,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      const Text('2. Datos Generales:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text('2. Datos Generales:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
                       const SizedBox(height: 10),
-                      TextField(
-                        controller: mascotaCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Nombre de la Mascota',
-                          prefixIcon: const Icon(Icons.pets, color: Color(0xFF0D9488)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                      ),
+                      _buildTextField(mascotaCtrl, 'Nombre de la Mascota', Icons.pets),
                       const SizedBox(height: 14),
                       DropdownButtonFormField<String>(
                         initialValue: especieSeleccionada,
+                        dropdownColor: modalBg,
+                        style: TextStyle(color: textColor, fontSize: 15),
                         decoration: InputDecoration(
                           labelText: 'Categoría / Especie',
+                          labelStyle: TextStyle(color: _isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700),
                           prefixIcon: const Icon(Icons.category, color: Color(0xFF0D9488)),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                         ),
@@ -595,78 +533,43 @@ class _HomeScreenState extends State<HomeScreen> {
                         onChanged: (val) => setModalState(() => especieSeleccionada = val!),
                       ),
                       const SizedBox(height: 14),
-                      TextField(
-                        controller: razaCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Raza (ej. Mestizo, Golden, Siamés)',
-                          prefixIcon: const Icon(Icons.style, color: Color(0xFF0D9488)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
+                      _buildTextField(razaCtrl, 'Raza (ej. Mestizo, Golden, Siamés)', Icons.style),
+                      const SizedBox(height: 14),
+                      _buildTextField(ubicacionCtrl, 'Ubicación (Ciudad / Barrio / Sector)', Icons.location_on, iconColor: Colors.redAccent),
+                      const SizedBox(height: 20),
+                      Text('3. Números de Contacto (Solo Números):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        tel1Ctrl,
+                        'Teléfono Principal (Máx 10 dígitos) *',
+                        Icons.phone,
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
                       ),
                       const SizedBox(height: 14),
-                      TextField(
-                        controller: ubicacionCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Ubicación (Ciudad / Barrio / Referencia)',
-                          prefixIcon: const Icon(Icons.location_on, color: Colors.redAccent),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
+                      _buildTextField(
+                        tel2Ctrl,
+                        'Teléfono Secundario / WhatsApp (Opcional)',
+                        Icons.chat,
+                        iconColor: const Color(0xFF059669),
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
                       ),
                       const SizedBox(height: 20),
-                      const Text('3. Números de Contacto (Solo Números):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text('4. Recompensa & Detalles:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
                       const SizedBox(height: 10),
-                      TextField(
-                        controller: tel1Ctrl,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: 'Teléfono Principal (Máx 10 dígitos) *',
-                          prefixIcon: const Icon(Icons.phone, color: Color(0xFF0D9488)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      TextField(
-                        controller: tel2Ctrl,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: 'Teléfono Secundario / WhatsApp (Opcional)',
-                          prefixIcon: const Icon(Icons.chat, color: Color(0xFF059669)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text('4. Recompensa & Detalles:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: recompensaCtrl,
+                      _buildTextField(
+                        recompensaCtrl,
+                        'Monto de Recompensa en USD (Solo números)',
+                        Icons.monetization_on,
+                        iconColor: Colors.amber,
                         keyboardType: TextInputType.number,
                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        decoration: InputDecoration(
-                          labelText: 'Monto de Recompensa en USD (Solo números)',
-                          prefixText: '\$ ',
-                          suffixText: ' USD',
-                          prefixIcon: const Icon(Icons.monetization_on, color: Colors.amber),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
+                        prefixText: '\$ ',
+                        suffixText: ' USD',
                       ),
                       const SizedBox(height: 14),
-                      TextField(
-                        controller: descCtrl,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: 'Caja de Descripción (Color, señas, comportamiento)',
-                          alignLabelWithHint: true,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                      ),
+                      _buildTextField(descCtrl, 'Caja de Descripción (Color, señas, rasgos)', Icons.description, maxLines: 3),
                       const SizedBox(height: 24),
                       SizedBox(
                         height: 52,
@@ -701,10 +604,49 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    Color iconColor = const Color(0xFF0D9488),
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    int maxLines = 1,
+    String? prefixText,
+    String? suffixText,
+  }) {
+    final textColor = _isDarkMode ? Colors.white : const Color(0xFF1F2937);
+    final labelColor = _isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700;
+
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      maxLines: maxLines,
+      style: TextStyle(color: textColor),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: labelColor),
+        prefixIcon: Icon(icon, color: iconColor),
+        prefixText: prefixText,
+        suffixText: suffixText,
+        prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+        suffixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: _isDarkMode ? const Color(0xFF475569) : Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF0D9488), width: 2),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = _estiloActual == EstiloDiseno.modoOscuro;
-    final bgBackgroundColor = isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF3F4F6);
+    final bgBackgroundColor = _isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF3F4F6);
 
     return Scaffold(
       backgroundColor: bgBackgroundColor,
@@ -718,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 22,
-                color: isDarkMode ? const Color(0xFF38BDF8) : Colors.white,
+                color: _isDarkMode ? const Color(0xFF38BDF8) : Colors.white,
               ),
             ),
           ],
@@ -726,7 +668,7 @@ class _HomeScreenState extends State<HomeScreen> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: isDarkMode
+              colors: _isDarkMode
                   ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
                   : [const Color(0xFF0F766E), const Color(0xFF0D9488)],
             ),
@@ -735,10 +677,15 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         elevation: 6,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.palette_rounded),
-            onPressed: _mostrarSelectorEstilos,
-            tooltip: 'Cambiar Estilo UI',
+          Row(
+            children: [
+              Icon(_isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded, size: 20, color: Colors.amber),
+              Switch(
+                value: _isDarkMode,
+                activeThumbColor: Colors.amber,
+                onChanged: (val) => setState(() => _isDarkMode = val),
+              ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -782,8 +729,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: const Color(0xFF0D9488),
-        unselectedItemColor: Colors.grey.shade500,
-        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        unselectedItemColor: _isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+        backgroundColor: _isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 10,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         onTap: (index) => setState(() => _currentIndex = index),
@@ -802,15 +749,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildReportesTab() {
-    final isDarkMode = _estiloActual == EstiloDiseno.modoOscuro;
-
     return Column(
       children: [
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: isDarkMode
+              colors: _isDarkMode
                   ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
                   : [const Color(0xFF0F766E), const Color(0xFF0D9488)],
             ),
@@ -826,15 +771,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   hintText: 'Buscar mascota, raza o ciudad...',
                   prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0D9488)),
                   filled: true,
-                  fillColor: isDarkMode ? const Color(0xFF334155) : Colors.white,
-                  hintStyle: TextStyle(color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
+                  fillColor: _isDarkMode ? const Color(0xFF334155) : Colors.white,
+                  hintStyle: TextStyle(color: _isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600),
                   contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
                   ),
                 ),
-                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
+                style: TextStyle(color: _isDarkMode ? Colors.white : Colors.black87),
               ),
               const SizedBox(height: 14),
               SingleChildScrollView(
@@ -893,7 +838,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: reportes.length,
                   itemBuilder: (context, index) {
                     final reporte = reportes[index];
-                    return _buildTarjetaSegunEstilo(reporte, index);
+                    return _buildTarjetaMascota(reporte);
                   },
                 ),
               );
@@ -904,251 +849,187 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTarjetaSegunEstilo(Reporte reporte, int index) {
-    switch (_estiloActual) {
-      case EstiloDiseno.glassmorphism:
-        return _buildTarjetaGlassmorphism(reporte);
-      case EstiloDiseno.bentoGrid:
-        return _buildTarjetaBentoGrid(reporte);
-      case EstiloDiseno.neumorfismo:
-        return _buildTarjetaNeumorfismo(reporte);
-      case EstiloDiseno.neoBrutalism:
-        return _buildTarjetaNeoBrutalism(reporte);
-      case EstiloDiseno.modoOscuro:
-        return _buildTarjetaModoOscuro(reporte);
-      case EstiloDiseno.spatial3D:
-        return _buildTarjetaSpatial3D(reporte, index);
-    }
-  }
+  Widget _buildTarjetaMascota(Reporte reporte) {
+    final cardBg = _isDarkMode ? const Color(0xFF1E293B) : Colors.white;
+    final titleColor = _isDarkMode ? Colors.white : const Color(0xFF1F2937);
+    final descColor = _isDarkMode ? Colors.grey.shade300 : const Color(0xFF4B5563);
 
-  Widget _buildTarjetaGlassmorphism(Reporte reporte) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5),
+        border: Border.all(color: _isDarkMode ? const Color(0xFF334155) : Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.teal.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: _isDarkMode ? 0.3 : 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           )
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: InkWell(
-            onTap: () => _mostrarDetalleMascota(reporte),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.network(reporte.imagenUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(reporte.mascota, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      Text('${reporte.especie} • ${reporte.raza}', style: const TextStyle(color: Color(0xFF0D9488))),
-                      const SizedBox(height: 6),
-                      Text('Contacto: ${reporte.telefonoPrincipal}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTarjetaBentoGrid(Reporte reporte) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: InkWell(
-        onTap: () => _mostrarDetalleMascota(reporte),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(reporte.imagenUrl, height: 120, fit: BoxFit.cover),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(reporte.mascota, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('${reporte.especie} • ${reporte.raza}', style: const TextStyle(fontSize: 12, color: Colors.teal)),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.teal.shade50, borderRadius: BorderRadius.circular(12)),
-                        child: Text('📍 ${reporte.ubicacion}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTarjetaNeumorfismo(Reporte reporte) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(color: Colors.white, offset: Offset(-6, -6), blurRadius: 10),
-          BoxShadow(color: Color(0xFFD1D5DB), offset: Offset(6, 6), blurRadius: 10),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => _mostrarDetalleMascota(reporte),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(reporte.imagenUrl, width: 90, height: 90, fit: BoxFit.cover),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(reporte.mascota, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('Tel: ${reporte.telefonoPrincipal}', style: const TextStyle(color: Color(0xFF0D9488))),
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTarjetaNeoBrutalism(Reporte reporte) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.amber.shade100,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black, width: 3),
-        boxShadow: const [
-          BoxShadow(color: Colors.black, offset: Offset(6, 6)),
-        ],
-      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _mostrarDetalleMascota(reporte),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(reporte.imagenUrl, height: 160, width: double.infinity, fit: BoxFit.cover),
+            Stack(
+              children: [
+                Image.network(
+                  reporte.imagenUrl,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+                      child: const Center(
+                        child: Icon(Icons.pets, size: 60, color: Color(0xFF0D9488)),
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  top: 14,
+                  right: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      reporte.estado,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 14,
+                  left: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: reporte.esVerificado ? const Color(0xFF059669) : const Color(0xFFD97706),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 4,
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          reporte.esVerificado ? Icons.verified_user_rounded : Icons.gpp_maybe_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          reporte.esVerificado ? 'Verificado' : 'No Verificado',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          reporte.mascota,
+                          style: TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.bold,
+                            color: titleColor,
+                          ),
+                        ),
+                      ),
+                      if (reporte.recompensa != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF3C7),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFF59E0B)),
+                          ),
+                          child: Text(
+                            ' ${reporte.recompensa!}',
+                            style: const TextStyle(
+                              color: Color(0xFFB45309),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
                   Text(
-                    reporte.mascota.toUpperCase(),
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black),
+                    '${reporte.especie} • ${reporte.raza}',
+                    style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 13),
                   ),
-                  Text('CONTACTO: ${reporte.telefonoPrincipal}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_rounded, size: 16, color: Colors.redAccent),
+                      const SizedBox(width: 4),
+                      Text(reporte.ubicacion, style: TextStyle(color: _isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700, fontSize: 13)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    reporte.descripcion,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: descColor, fontSize: 13, height: 1.4),
+                  ),
+                  const SizedBox(height: 14),
+                  Divider(height: 1, color: _isDarkMode ? const Color(0xFF334155) : Colors.grey.shade300),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.phone_in_talk_rounded, size: 16, color: Color(0xFF0D9488)),
+                      const SizedBox(width: 6),
+                      Text(
+                        reporte.telefonoPrincipal,
+                        style: TextStyle(
+                          color: _isDarkMode ? const Color(0xFF38BDF8) : const Color(0xFF0D9488),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Spacer(),
+                      TextButton.icon(
+                        onPressed: () => _mostrarDetalleMascota(reporte),
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                        label: const Text('Ver Ficha'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: _isDarkMode ? const Color(0xFF38BDF8) : const Color(0xFF0D9488),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            )
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTarjetaModoOscuro(Reporte reporte) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF334155)),
-      ),
-      child: InkWell(
-        onTap: () => _mostrarDetalleMascota(reporte),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.network(reporte.imagenUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(reporte.mascota, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                  Text('${reporte.especie} • ${reporte.raza}', style: const TextStyle(color: Color(0xFF38BDF8))),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTarjetaSpatial3D(Reporte reporte, int index) {
-    return Transform(
-      transform: Matrix4.identity()
-        ..setEntry(3, 2, 0.001)
-        ..rotateX(0.04)
-        ..rotateY(-0.02),
-      alignment: FractionalOffset.center,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.teal.withValues(alpha: 0.25),
-              blurRadius: 20,
-              offset: const Offset(0, 12),
-            )
-          ],
-        ),
-        child: InkWell(
-          onTap: () => _mostrarDetalleMascota(reporte),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Image.network(reporte.imagenUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(reporte.mascota, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              )
-            ],
-          ),
         ),
       ),
     );
@@ -1171,44 +1052,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAuthTab() {
+    final cardBg = _isDarkMode ? const Color(0xFF1E293B) : const Color(0xFFCCFBF1);
+    final titleColor = _isDarkMode ? const Color(0xFF38BDF8) : const Color(0xFF0F766E);
+    final textColor = _isDarkMode ? Colors.white : Colors.teal.shade900;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            color: const Color(0xFFCCFBF1),
+            color: cardBg,
+            elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.verified_user_rounded, color: Color(0xFF0F766E), size: 26),
-                      SizedBox(width: 10),
-                      Text('Diagnóstico de Autenticación HTTP', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0F766E))),
+                      Icon(Icons.verified_user_rounded, color: titleColor, size: 26),
+                      const SizedBox(width: 10),
+                      Text('Diagnóstico de Autenticación HTTP', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: titleColor)),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Demuestra la conectividad bidireccional realizando una solicitud POST a /api/login y obteniendo el Token JWT devuelto por el servidor Node.js.',
-                    style: TextStyle(fontSize: 13, color: Colors.teal.shade900, height: 1.4),
+                    style: TextStyle(fontSize: 13, color: textColor, height: 1.4),
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 24),
-          TextField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              labelText: 'Email de Usuario',
-              prefixIcon: const Icon(Icons.email_rounded, color: Color(0xFF0D9488)),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
-            ),
-          ),
+          _buildTextField(_emailController, 'Email de Usuario', Icons.email_rounded),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
@@ -1233,13 +1112,13 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: _isDarkMode ? const Color(0xFF064E3B) : Colors.green.shade50,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: Colors.green),
               ),
               child: SelectableText(
                 _jwtToken,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: _isDarkMode ? Colors.green.shade200 : Colors.green.shade900),
               ),
             ),
           ],
@@ -1249,7 +1128,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
+                color: _isDarkMode ? const Color(0xFF78350F) : Colors.red.shade50,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: Colors.red),
               ),
