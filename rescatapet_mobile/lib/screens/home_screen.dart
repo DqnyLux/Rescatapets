@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../models/reporte.dart';
+import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
   bool _isDarkMode = false;
   late Future<List<Reporte>> _futureReportes;
@@ -19,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   final _emailController = TextEditingController(text: 'juan@test.com');
+  final _passwordDiagCtrl = TextEditingController(text: '123456');
   String _jwtToken = '';
   String _authError = '';
   bool _isLoggingIn = false;
@@ -43,9 +47,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     try {
-      final token = await ApiService.login(_emailController.text.trim());
+      final datos = await ApiService.login(
+        _emailController.text.trim(),
+        _passwordDiagCtrl.text,
+      );
       setState(() {
-        _jwtToken = token;
+        _jwtToken = datos['token']!;
       });
     } catch (e) {
       setState(() {
@@ -711,6 +718,15 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: _cargarReportes,
             tooltip: 'Actualizar API',
           ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Cerrar sesión',
+            onPressed: () async {
+              await ref.read(authProvider.notifier).cerrarSesion();
+              if (!context.mounted) return;
+              context.go('/login');
+            },
+          ),
         ],
       ),
       body: IndexedStack(
@@ -1107,6 +1123,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 24),
           _buildTextField(_emailController, 'Email de Usuario', Icons.email_rounded),
+          const SizedBox(height: 14),
+          _buildTextField(_passwordDiagCtrl, 'Contraseña', Icons.lock_outline_rounded),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,

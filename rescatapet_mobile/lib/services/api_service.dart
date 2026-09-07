@@ -52,24 +52,67 @@ class ApiService {
     }
   }
 
-  static Future<String> login(String email) async {
+  /// Inicia sesión con email y contraseña.
+  /// Retorna un mapa con token, nombre y email del usuario autenticado.
+  static Future<Map<String, String>> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/login');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
+        body: jsonEncode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 10));
 
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['token'] as String;
+        return {
+          'token': data['token'] as String,
+          'nombre': data['nombre'] as String,
+          'email': data['email'] as String,
+        };
       } else {
-        final data = jsonDecode(response.body);
-        throw Exception(data['error'] ?? 'Error de autenticación');
+        throw Exception(data['error'] ?? 'Credenciales incorrectas');
       }
     } catch (e) {
+      if (e is Exception) rethrow;
       throw Exception('Error al iniciar sesión: $e');
+    }
+  }
+
+  /// Registra un nuevo usuario en el backend.
+  /// Retorna un mapa con token, nombre y email del usuario creado.
+  static Future<Map<String, String>> registro(
+    String nombre,
+    String email,
+    String password,
+  ) async {
+    final url = Uri.parse('$baseUrl/registro');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nombre': nombre,
+          'email': email,
+          'password': password,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 201) {
+        return {
+          'token': data['token'] as String,
+          'nombre': data['nombre'] as String,
+          'email': data['email'] as String,
+        };
+      } else {
+        throw Exception(data['error'] ?? 'No se pudo crear la cuenta');
+      }
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Error al registrar usuario: $e');
     }
   }
 }
