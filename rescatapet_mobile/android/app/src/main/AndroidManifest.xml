@@ -1,6 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.rescatapet_mobile">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Capacidad Nativa 1: Geolocalización GPS precisa y aproximada -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Capacidad Nativa 2: Captura fotográfica con Cámara del dispositivo -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Capacidad Nativa 3: Acceso a Galería de fotos (Android 13+ y anteriores) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
     <application
         android:label="RescataPet EC"
         android:name="${applicationName}"

@@ -29,6 +29,14 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<!-- Capacidad Nativa 1: Geolocalización GPS -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>RescataPet EC necesita acceder a tu ubicación mientras usas la app para calcular la distancia en tiempo real a las mascotas extraviadas cercanas y georreferenciar los reportes de rescate.</string>
+	<!-- Capacidad Nativa 2: Cámara y Selector de Fotos -->
+	<key>NSCameraUsageDescription</key>
+	<string>RescataPet EC necesita acceder a la cámara para tomar fotos de mascotas perdidas o encontradas y adjuntarlas a las alertas de rescate.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>RescataPet EC necesita acceder a la galería para seleccionar fotografías de las mascotas para los reportes de extravío o adopción.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
