@@ -193,9 +193,10 @@ class NativeLocationService {
     String pais = cantonCercano.pais.nombre;
 
     try {
-      final List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng).timeout(
-        const Duration(seconds: 4),
-      );
+      final geocoding = Geocoding();
+      final List<Placemark> placemarks = await geocoding
+          .placemarkFromCoordinates(lat, lng)
+          .timeout(const Duration(seconds: 4));
 
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;

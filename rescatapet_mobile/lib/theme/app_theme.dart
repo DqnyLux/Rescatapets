@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Paleta de colores primaria inspirada en rescate animal & naturaleza
-  static const Color primary = Color(0xFF0F766E); // Teal 700
-  static const Color primaryLight = Color(0xFF0D9488); // Teal 600
-  static const Color primaryGradientEnd = Color(0xFF14B8A6); // Teal 500
-  static const Color accent = Color(0xFFF59E0B); // Amber 500
-  static const Color alertCoral = Color(0xFFEF4444); // Red 500
-  static const Color successGreen = Color(0xFF10B981); // Emerald 500
-  static const Color infoBlue = Color(0xFF3B82F6); // Blue 500
+  // Paleta audaz de urgencia para rescate. Naranja vibrante para atención.
+  static const Color primary = Color(0xFFEA580C); // Orange 600
+  static const Color primaryLight = Color(0xFFF97316); // Orange 500
+  static const Color primaryGradientEnd = Color(0xFFFB923C); // Orange 400
+  static const Color accent = Color(0xFF2563EB); // Blue 600 (contraste claro)
+  static const Color alertCoral = Color(0xFFDC2626); // Red 600
+  static const Color successGreen = Color(0xFF16A34A); // Green 600
+  static const Color infoBlue = Color(0xFF2563EB); // Blue 600
 
-  // Colores de fondo Light
-  static const Color bgLight = Color(0xFFF8FAFC); // Slate 50
+  // Fondos crudos y directos
+  static const Color bgLight = Color(0xFFFDFBF7); // Off-white orgánico
   static const Color cardLight = Colors.white;
-  static const Color textDark = Color(0xFF0F172A); // Slate 900
-  static const Color textMutedLight = Color(0xFF64748B); // Slate 500
+  static const Color textDark = Color(0xFF171717); // Casi negro
+  static const Color textMutedLight = Color(0xFF737373); // Neutral gris
 
-  // Colores de fondo Dark
-  static const Color bgDark = Color(0xFF0F172A); // Slate 900
-  static const Color cardDark = Color(0xFF1E293B); // Slate 800
-  static const Color textLight = Color(0xFFF8FAFC);
-  static const Color textMutedDark = Color(0xFF94A3B8); // Slate 400
+  // Fondos Oscuros con alto contraste
+  static const Color bgDark = Color(0xFF171717); // Casi negro
+  static const Color cardDark = Color(0xFF262626); // Neutral 800
+  static const Color textLight = Color(0xFFFAFAFA);
+  static const Color textMutedDark = Color(0xFFA3A3A3);
 
   static ThemeData lightTheme() {
     return ThemeData(
@@ -38,61 +38,61 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: textDark, size: 28),
         titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          letterSpacing: -0.3,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+          color: textDark,
+          letterSpacing: -0.5,
         ),
       ),
       cardTheme: CardThemeData(
         color: cardLight,
-        elevation: 2,
-        shadowColor: const Color(0xFF0F172A).withValues(alpha: 0.08),
+        elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Color(0xFFE5E5E5), width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: Colors.white,
-          elevation: 2,
-          shadowColor: primary.withValues(alpha: 0.3),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        labelStyle: const TextStyle(color: textMutedLight, fontSize: 14),
-        hintStyle: TextStyle(color: textMutedLight.withValues(alpha: 0.7), fontSize: 14),
-        prefixIconColor: primaryLight,
-        suffixIconColor: textMutedLight,
+        fillColor: const Color(0xFFF5F5F5),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        labelStyle: const TextStyle(color: textMutedLight, fontSize: 16, fontWeight: FontWeight.w600),
+        hintStyle: TextStyle(color: textMutedLight.withValues(alpha: 0.8), fontSize: 16),
+        prefixIconColor: textDark,
+        suffixIconColor: textDark,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.2),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primaryLight, width: 2),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: alertCoral, width: 1.2),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: alertCoral, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: alertCoral, width: 2),
         ),
       ),
@@ -101,9 +101,9 @@ class AppTheme {
         selectedItemColor: primary,
         unselectedItemColor: textMutedLight,
         type: BottomNavigationBarType.fixed,
-        elevation: 12,
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+        elevation: 8,
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: -0.2),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
       ),
     );
   }
@@ -114,9 +114,9 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: bgDark,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryLight,
+        seedColor: primary,
         brightness: Brightness.dark,
-        primary: primaryGradientEnd,
+        primary: primaryLight,
         secondary: accent,
         surface: cardDark,
       ),
@@ -124,71 +124,72 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: textLight, size: 28),
         titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-          letterSpacing: -0.3,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
+          color: textLight,
+          letterSpacing: -0.5,
         ),
       ),
       cardTheme: CardThemeData(
         color: cardDark,
-        elevation: 4,
-        shadowColor: Colors.black.withValues(alpha: 0.3),
+        elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF334155), width: 1),
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Color(0xFF404040), width: 1.5),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryLight,
           foregroundColor: Colors.white,
-          elevation: 2,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E293B),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        labelStyle: const TextStyle(color: textMutedDark, fontSize: 14),
-        hintStyle: TextStyle(color: textMutedDark.withValues(alpha: 0.7), fontSize: 14),
-        prefixIconColor: primaryGradientEnd,
-        suffixIconColor: textMutedDark,
+        fillColor: const Color(0xFF262626),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        labelStyle: const TextStyle(color: textMutedDark, fontSize: 16, fontWeight: FontWeight.w600),
+        hintStyle: TextStyle(color: textMutedDark.withValues(alpha: 0.8), fontSize: 16),
+        prefixIconColor: textLight,
+        suffixIconColor: textLight,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF334155), width: 1.2),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: primaryGradientEnd, width: 2),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: primaryLight, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: alertCoral, width: 1.2),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: alertCoral, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: alertCoral, width: 2),
         ),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF1E293B),
-        selectedItemColor: primaryGradientEnd,
+        backgroundColor: Color(0xFF171717),
+        selectedItemColor: primaryLight,
         unselectedItemColor: textMutedDark,
         type: BottomNavigationBarType.fixed,
-        elevation: 12,
-        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+        elevation: 8,
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: -0.2),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
       ),
     );
   }
