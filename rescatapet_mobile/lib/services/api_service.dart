@@ -113,12 +113,38 @@ class ApiService {
   static Future<void> crearReporte({
     required String mascota,
     required String ubicacion,
+    String? especie,
+    String? raza,
+    String? ciudad,
+    String? sector,
+    double? latitud,
+    double? longitud,
+    String? tipoAlerta,
+    String? telefonoPrincipal,
+    String? descripcion,
+    String? tamano,
+    String? sexo,
+    String? color,
+    String? imagenBase64,
     required String estado,
   }) async {
     try {
       final response = await _postWithFailover('/reportes/publicos', {
         'mascota': mascota,
         'ubicacion': ubicacion,
+        'especie': especie,
+        'raza': raza,
+        'ciudad': ciudad,
+        'sector': sector,
+        'latitud': latitud,
+        'longitud': longitud,
+        'tipoAlerta': tipoAlerta,
+        'telefonoPrincipal': telefonoPrincipal ?? '0990000000',
+        'descripcion': descripcion,
+        'tamano': tamano,
+        'sexo': sexo,
+        'color': color,
+        'imagenBase64': imagenBase64,
         'estado': estado,
       });
 
@@ -126,7 +152,7 @@ class ApiService {
         throw Exception('Error al guardar reporte: ${response.statusCode}');
       }
     } catch (e) {
-      // Si el backend no responde, registramos advertencia sin bloquear la app
+      // Offline fallback
     }
   }
 

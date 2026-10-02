@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -554,28 +555,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return placeholderWidget;
     }
 
-    final isLocal = !pathOrUrl.startsWith('http://') && !pathOrUrl.startsWith('https://');
     Widget imgWidget;
 
-    if (isLocal) {
+    if (pathOrUrl.startsWith('data:image')) {
+      final pureBase64 = pathOrUrl.contains(',') ? pathOrUrl.split(',').last : pathOrUrl;
+      imgWidget = Image.memory(
+        base64Decode(pureBase64),
+        width: width, height: height, fit: fit,
+        errorBuilder: (c, e, s) => Container(color: AppTheme.alertCoral.withValues(alpha:0.1)),
+      );
+    } else if (!pathOrUrl.startsWith('http')) {
       imgWidget = Image.file(
         File(pathOrUrl),
-        width: width,
-        height: height,
-        fit: fit,
+        width: width, height: height, fit: fit,
         errorBuilder: (context, error, stackTrace) => Container(
-          width: width,
-          height: height,
-          color: AppTheme.primary.withValues(alpha: 0.15),
+          width: width, height: height, color: AppTheme.primary.withValues(alpha: 0.15),
           child: const Center(child: Icon(Icons.pets, size: 48, color: AppTheme.primary)),
         ),
       );
     } else {
       imgWidget = Image.network(
         pathOrUrl,
-        width: width,
-        height: height,
-        fit: fit,
+        width: width, height: height, fit: fit,
         errorBuilder: (context, error, stackTrace) => Container(
           width: width,
           height: height,
@@ -778,6 +779,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
+                        child: Text('${reporte.especie} ${reporte.raza}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF334155))),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
+                        child: Text('Sexo: ${reporte.sexo}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF334155))),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
+                        child: Text('Tamaño: ${reporte.tamano}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF334155))),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
+                        child: Text('Color: ${reporte.color}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF334155))),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
                   // Radar de Geolocalización Exacta & Coordenadas
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -867,22 +896,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () {
-                                  Clipboard.setData(ClipboardData(
-                                    text: '${reporte.latitud},${reporte.longitud}',
-                                  ));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text('Coordenadas GPS copiadas al portapapeles.'),
-                                      backgroundColor: AppTheme.primary,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    ),
-                                  );
+                                onTap: () async {
+                                  final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${reporte.latitud},${reporte.longitud}');
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                                  }
                                 },
-                                child: const Icon(Icons.copy_rounded, size: 16, color: AppTheme.primaryLight),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.map_rounded, size: 14, color: AppTheme.primary),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Abrir Maps',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppTheme.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: SizedBox(
+                            height: 150,
+                            width: double.infinity,
+                            child: FlutterMap(
+                              options: MapOptions(
+                                initialCenter: LatLng(reporte.latitud, reporte.longitud),
+                                initialZoom: 15.0,
+                                interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+                              ),
+                              children: [
+                                TileLayer(
+                                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                  userAgentPackageName: 'com.example.rescatapet_mobile',
+                                ),
+                                CircleLayer(
+                                  circles: [
+                                    CircleMarker(
+                                      point: LatLng(reporte.latitud, reporte.longitud),
+                                      radius: 200,
+                                      useRadiusInMeter: true,
+                                      color: AppTheme.primary.withValues(alpha: 0.2),
+                                      borderColor: AppTheme.primary,
+                                      borderStrokeWidth: 2,
+                                    ),
+                                  ],
+                                ),
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: LatLng(reporte.latitud, reporte.longitud),
+                                      width: 40, height: 40,
+                                      child: const Icon(Icons.location_on, color: AppTheme.alertCoral, size: 40),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -1180,6 +1265,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final tel2Ctrl = TextEditingController();
     final descCtrl = TextEditingController();
     final recompensaCtrl = TextEditingController();
+    final colorCtrl = TextEditingController();
     String tamanoSeleccionado = 'Mediano';
     String sexoSeleccionado = 'Macho';
     bool tieneCollar = true;
@@ -1479,11 +1565,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       TextField(
                         controller: razaCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Raza / Color predominante',
-                          hintText: 'ej. Mestizo, Golden, Siamés',
-                          prefixIcon: Icon(Icons.style_rounded),
-                        ),
+                        decoration: const InputDecoration(labelText: 'Raza', hintText: 'ej. Mestizo, Golden, Siamés', prefixIcon: Icon(Icons.style_rounded)),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              initialValue: sexoSeleccionado,
+                              dropdownColor: isDark ? AppTheme.cardDark : Colors.white,
+                              style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark, fontSize: 13),
+                              decoration: const InputDecoration(labelText: 'Sexo', prefixIcon: Icon(Icons.transgender_rounded)),
+                              items: const [
+                                DropdownMenuItem(value: 'Macho', child: Text('Macho')),
+                                DropdownMenuItem(value: 'Hembra', child: Text('Hembra')),
+                                DropdownMenuItem(value: 'Desconocido', child: Text('Desconocido')),
+                              ],
+                              onChanged: (val) => setModalState(() => sexoSeleccionado = val!),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: colorCtrl,
+                              decoration: const InputDecoration(labelText: 'Color / Marcas', hintText: 'ej. Negro con pecho blanco', prefixIcon: Icon(Icons.color_lens_rounded)),
+                            ),
+                          ),
+                        ]
                       ),
                       const SizedBox(height: 12),
 
@@ -1840,8 +1948,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             });
 
                             try {
+                              String? b64;
+                              if (imagenSeleccionada.isNotEmpty && !imagenSeleccionada.startsWith('http')) {
+                                try {
+                                  final bytes = await File(imagenSeleccionada).readAsBytes();
+                                  b64 = 'data:image/jpeg;base64,' + base64Encode(bytes);
+                                } catch(_) {}
+                              }
                               await ApiService.crearReporte(
-                                mascota: '$nombreMascota ($especieSeleccionada)',
+                                mascota: nombreMascota,
+                                especie: especieSeleccionada,
+                                raza: razaCtrl.text.trim().isEmpty ? 'Mestizo' : razaCtrl.text.trim(),
+                                ciudad: cantonSeleccionado.nombre,
+                                sector: sector,
+                                latitud: latitudReporte,
+                                longitud: longitudReporte,
+                                tipoAlerta: tipoSeleccionado.codigo,
+                                telefonoPrincipal: telP,
+                                tamano: tamanoSeleccionado,
+                                sexo: sexoSeleccionado,
+                                color: colorCtrl.text.trim(),
+                                descripcion: descCtrl.text.trim(),
+                                imagenBase64: b64 ?? imagenSeleccionada,
                                 ubicacion: lugarCompleto,
                                 estado: 'PUBLICO',
                               );
@@ -3252,16 +3380,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             title: const Text('Acerca de RescataPet EC', style: TextStyle(fontWeight: FontWeight.w700)),
             subtitle: const Text('Versión 1.1.0 • Producción Ecuador'),
             onTap: () {
-              showAboutDialog(
+              showDialog(
                 context: context,
-                applicationName: 'RescataPet EC',
-                applicationVersion: '1.1.0',
-                applicationIcon: const Icon(Icons.pets, size: 40, color: AppTheme.primary),
-                children: const [
-                  Text(
-                    'Aplicación móvil desarrollada con Flutter & Riverpod con geolocalización GPS, radar de cercanía y alertas comunitarias de rescate animal en Ecuador.',
-                  ),
-                ],
+                builder: (ctx) => AlertDialog(
+                  title: const Row(children: [Icon(Icons.pets, color: AppTheme.primary), SizedBox(width: 8), Text('Acerca de RescataPet')]),
+                  content: const Text('Aplicación móvil desarrollada con Flutter & Riverpod con geolocalización GPS, radar de cercanía y alertas comunitarias.\\n\\nDesarrollada para proyecto universitario.', style: TextStyle(height: 1.5)),
+                  actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cerrar'))]
+                )
               );
             },
           ),

@@ -88,13 +88,19 @@ const crearReporte = async (req, res) => {
 };
 
 const crearReportePublico = async (req, res) => {
-  const { mascota, ubicacion, estado } = req.body;
+  const {
+    mascota, ubicacion, estado, especie, raza, ciudad, sector,
+    latitud, longitud, tipoAlerta, telefonoPrincipal, descripcion,
+    tamano, sexo, color, imagenBase64
+  } = req.body;
 
   try {
     const nuevoReporte = await Reporte.create({
-      mascota: mascota || 'Mascota Extraviada',
+      mascota: mascota || 'Mascota',
       ubicacion: ubicacion || 'Ecuador',
       estado: estado || 'PUBLICO',
+      especie, raza, ciudad, sector, latitud, longitud, tipoAlerta,
+      telefonoPrincipal, descripcion, tamano, sexo, color, imagenBase64,
       usuarioId: 1
     });
 

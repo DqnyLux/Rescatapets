@@ -10,7 +10,7 @@ require('./worker');
 const hashPassword = (password) => crypto.createHash('sha256').update(password).digest('hex');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.get('/', (req, res) => {
   res.json({

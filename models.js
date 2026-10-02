@@ -13,8 +13,21 @@ const Usuario = sequelize.define('Usuario', {
 const Reporte = sequelize.define('Reporte', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   mascota: { type: DataTypes.STRING, allowNull: false },
+  especie: { type: DataTypes.STRING, defaultValue: 'Perro' },
+  raza: { type: DataTypes.STRING, defaultValue: 'Mestizo' },
   ubicacion: { type: DataTypes.STRING, allowNull: false },
-  estado: { type: DataTypes.STRING, defaultValue: 'PUBLICO' }
+  ciudad: { type: DataTypes.STRING, defaultValue: 'Quito' },
+  sector: { type: DataTypes.STRING, defaultValue: '' },
+  latitud: { type: DataTypes.DOUBLE, defaultValue: -0.1807 },
+  longitud: { type: DataTypes.DOUBLE, defaultValue: -78.4842 },
+  estado: { type: DataTypes.STRING, defaultValue: 'PUBLICO' },
+  tipoAlerta: { type: DataTypes.STRING, defaultValue: 'PERDIDO' },
+  telefonoPrincipal: { type: DataTypes.STRING, defaultValue: '0990000000' },
+  descripcion: { type: DataTypes.TEXT, defaultValue: '' },
+  tamano: { type: DataTypes.STRING, defaultValue: 'Mediano' },
+  sexo: { type: DataTypes.STRING, defaultValue: 'Macho' },
+  color: { type: DataTypes.STRING, defaultValue: 'Blanco' },
+  imagenBase64: { type: DataTypes.TEXT('long') } // Save Base64 images directly
 }, {
   timestamps: true
 });
