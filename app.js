@@ -67,7 +67,7 @@ app.get('/api/reportes/publicos', getReportesPublicos);
 app.post('/api/reportes/publicos', crearReportePublico);
 app.post('/api/reportes', authMiddleware, crearReporte);
 
-sequelize.sync().then(async () => {
+sequelize.sync({ alter: true }).then(async () => {
   console.log('Base de datos SQLite sincronizada.');
 
   // Usuario de demostración (solo se crea si no existe, para no perder registros)
