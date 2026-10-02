@@ -104,26 +104,7 @@ class Reporte {
   factory Reporte.fromJson(Map<String, dynamic> json) {
     final id = json['id'] as int? ?? DateTime.now().millisecondsSinceEpoch % 10000;
 
-    final coordenadas = [
-      {'lat': -0.1807, 'lng': -78.4842, 'ciudad': 'Quito', 'sec': 'Parque La Carolina'},
-      {'lat': -0.1915, 'lng': -78.4880, 'ciudad': 'Quito', 'sec': 'González Suárez'},
-      {'lat': -0.2201, 'lng': -78.5123, 'ciudad': 'Quito', 'sec': 'Centro Histórico'},
-      {'lat': -0.2033, 'lng': -78.4312, 'ciudad': 'Quito', 'sec': 'Cumbayá'},
-      {'lat': -2.1894, 'lng': -79.8891, 'ciudad': 'Guayaquil', 'sec': 'Malecón 2000'},
-      {'lat': -2.9001, 'lng': -79.0059, 'ciudad': 'Cuenca', 'sec': 'Parque Calderón'},
-      {'lat': -0.9538, 'lng': -80.7089, 'ciudad': 'Manta', 'sec': 'Playa Murciélago'},
-      {'lat': -1.2491, 'lng': -78.6168, 'ciudad': 'Ambato', 'sec': 'Ficoa'},
-    ];
-    final coordInfo = coordenadas[(id - 1) % coordenadas.length];
 
-    final tipos = [
-      TipoAlerta.perdido,
-      TipoAlerta.encontrado,
-      TipoAlerta.sos,
-      TipoAlerta.adopcion,
-      TipoAlerta.perdido,
-      TipoAlerta.encontrado,
-    ];
 
     // No se usan imágenes falsas de internet por defecto; solo fotos reales si vienen dadas
     final fotoRaw = json['imagenUrl'] as String? ?? json['foto'] as String? ?? '';

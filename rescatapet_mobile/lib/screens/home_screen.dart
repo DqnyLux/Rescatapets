@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/geografia.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../screens/legal_screen.dart';
 import '../models/reporte.dart';
 import '../providers/auth_provider.dart';
@@ -38,70 +40,117 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // Ubicación actual del usuario (Simulada / GPS)
-  final List<UbicacionReferencia> _ciudadesEcuador = const [
-    UbicacionReferencia(
-      nombre: 'Quito Norte - La Carolina',
-      ciudad: 'Quito',
-      latitud: -0.1807,
-      longitud: -78.4842,
-    ),
-    UbicacionReferencia(
-      nombre: 'Quito Centro - Plaza Grande',
-      ciudad: 'Quito',
-      latitud: -0.2201,
-      longitud: -78.5123,
-    ),
-    UbicacionReferencia(
-      nombre: 'Quito Sur - El Recreo',
-      ciudad: 'Quito',
-      latitud: -0.2483,
-      longitud: -78.5218,
-    ),
-    UbicacionReferencia(
-      nombre: 'Cumbayá / Tumbaco',
-      ciudad: 'Quito',
-      latitud: -0.2033,
-      longitud: -78.4312,
-    ),
-    UbicacionReferencia(
-      nombre: 'Guayaquil - Malecón 2000',
-      ciudad: 'Guayaquil',
-      latitud: -2.1894,
-      longitud: -79.8891,
-    ),
-    UbicacionReferencia(
-      nombre: 'Guayaquil - Samborondón',
-      ciudad: 'Guayaquil',
-      latitud: -2.1400,
-      longitud: -79.8650,
-    ),
-    UbicacionReferencia(
-      nombre: 'Cuenca - Parque Calderón',
-      ciudad: 'Cuenca',
-      latitud: -2.9001,
-      longitud: -79.0059,
-    ),
-    UbicacionReferencia(
-      nombre: 'Manta - El Murciélago',
-      ciudad: 'Manta',
-      latitud: -0.9500,
-      longitud: -80.7333,
-    ),
-    UbicacionReferencia(
-      nombre: 'Ambato - Ficoa',
-      ciudad: 'Ambato',
-      latitud: -1.2417,
-      longitud: -78.6197,
-    ),
-  ];
-
+  
   late UbicacionReferencia _ubicacionUsuario;
+  final _storage = const FlutterSecureStorage();
+  
 
   @override
   void initState() {
     super.initState();
-    _ubicacionUsuario = _ciudadesEcuador[0]; // Quito La Carolina por defecto
-    _cargarReportes();
+    _ubicacionUsuario = const UbicacionReferencia(nombre: 'GPS', ciudad: '', latitud: -0.1807, longitud: -78.4842);
+    _initLocation();
+  }
+
+  Future<void> _initLocation() async {
+    final latStr = await _storage.read(key: 'userLat');
+    final lngStr = await _storage.read(key: 'userLng');
+    final addrStr = await _storage.read(key: 'userAddr');
+
+    if (latStr != null && lngStr != null && addrStr != null) {
+      if (mounted) {
+        setState(() {
+          _ubicacionUsuario = UbicacionReferencia(
+            nombre: addrStr,
+            ciudad: addrStr.split(',').first,
+            latitud: double.parse(latStr),
+            longitud: double.parse(lngStr)
+          );
+          
+        });
+        _cargarReportes();
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _mostrarOnboardingUbicacion();
+        });
+      }
+    }
+  }
+
+  void _mostrarOnboardingUbicacion() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.location_on_rounded, size: 48, color: AppTheme.primary),
+              const SizedBox(height: 16),
+              const Text(
+                'Ubicación Inicial',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Por favor, establece tu ubicación de cobertura para ver las mascotas perdidas y en adopción cerca de ti.',
+                style: TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await NativeLocationService.obtenerPosicionActual(context, mostrarDialogoPrevio: false);
+                  if (result.estado == EstadoPermisoNativo.concedido && result.posicion != null) {
+                    final addr = result.direccion?.direccionCompleta ?? 'GPS Location';
+                    await _storage.write(key: 'userLat', value: result.posicion!.latitude.toString());
+                    await _storage.write(key: 'userLng', value: result.posicion!.longitude.toString());
+                    await _storage.write(key: 'userAddr', value: addr);
+                    
+                    if (mounted) {
+                      setState(() {
+                        _ubicacionUsuario = UbicacionReferencia(
+                          nombre: addr, ciudad: result.direccion?.cantonOCiudad ?? '', latitud: result.posicion!.latitude, longitud: result.posicion!.longitude
+                        );
+                      });
+                      Navigator.pop(ctx);
+                      _cargarReportes();
+                    }
+                  } else {
+                    if (mounted) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(result.mensaje)));
+                    }
+                  }
+                },
+                icon: const Icon(Icons.gps_fixed),
+                label: const Text('Usar GPS Actual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(54),
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ],
+          )
+        );
+      }
+    );
   }
 
   @override
@@ -443,54 +492,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
 
-                      ..._ciudadesEcuador.map((ubi) {
-                        final esActual = ubi.nombre == tempNombre;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Material(
-                            color: esActual
-                                ? AppTheme.primary.withValues(alpha: 0.12)
-                                : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
-                            borderRadius: BorderRadius.circular(14),
-                            child: ListTile(
-                              dense: true,
-                              onTap: () {
-                                setModalState(() {
-                                  tempLat = ubi.latitud;
-                                  tempLng = ubi.longitud;
-                                  tempNombre = ubi.nombre;
-                                  tempCiudad = ubi.ciudad;
-                                });
-                                mapController.move(LatLng(ubi.latitud, ubi.longitud), 13.0);
-                              },
-                              leading: Icon(
-                                Icons.location_city_rounded,
-                                color: esActual ? AppTheme.primaryLight : (isDark ? Colors.white70 : Colors.black54),
-                                size: 20,
-                              ),
-                              title: Text(
-                                ubi.nombre,
-                                style: TextStyle(
-                                  fontWeight: esActual ? FontWeight.w900 : FontWeight.w700,
-                                  color: isDark ? Colors.white : AppTheme.textDark,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              subtitle: Text(
-                                '${ubi.ciudad} • (${ubi.latitud.toStringAsFixed(3)}, ${ubi.longitud.toStringAsFixed(3)})',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark ? AppTheme.textMutedDark : AppTheme.textMutedLight,
-                                ),
-                              ),
-                              trailing: esActual
-                                  ? const Icon(Icons.check_circle_rounded, color: AppTheme.primaryLight, size: 18)
-                                  : null,
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
+                      ListTile(
+  leading: const Icon(Icons.my_location, color: AppTheme.primary),
+  title: const Text('Usar GPS Actual', style: TextStyle(fontWeight: FontWeight.bold)),
+  onTap: () async {
+    final result = await NativeLocationService.obtenerPosicionActual(context, mostrarDialogoPrevio: false);
+    if (result.estado == EstadoPermisoNativo.concedido && result.posicion != null) {
+      final addr = result.direccion?.direccionCompleta ?? 'GPS Actual';
+      setModalState(() {
+        tempLat = result.posicion!.latitude;
+        tempLng = result.posicion!.longitude;
+        tempNombre = addr;
+        tempCiudad = result.direccion?.cantonOCiudad ?? '';
+      });
+      mapController.move(LatLng(result.posicion!.latitude, result.posicion!.longitude), 14.0);
+    }
+  },
+),                    ],
                   ),
                 );
               },
@@ -932,7 +950,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: SizedBox(
-                            height: 150,
+                            height: 200,
                             width: double.infinity,
                             child: FlutterMap(
                               options: MapOptions(

@@ -80,21 +80,39 @@ sequelize.sync({ alter: true }).then(async () => {
   if (totalReportes === 0) {
     await Reporte.bulkCreate([
       {
-        mascota: 'Max - Golden Retriever',
-        ubicacion: 'Quito Norte - Parque La Carolina',
+        mascota: 'Max',
+        especie: 'Perro',
+        raza: 'Golden Retriever',
+        ubicacion: 'Quito, Parque La Carolina',
+        ciudad: 'Quito',
+        sector: 'La Carolina',
+        latitud: -0.1807,
+        longitud: -78.4842,
         estado: 'PUBLICO',
+        tipoAlerta: 'PERDIDO',
+        telefonoPrincipal: '0991234567',
+        descripcion: 'Visto cerca del jardín botánico.',
+        tamano: 'Grande',
+        sexo: 'Macho',
+        color: 'Dorado',
         usuarioId: user.id
       },
       {
-        mascota: 'Luna - Gata Siamesa',
-        ubicacion: 'Guayaquil - Samborondón',
+        mascota: 'Luna',
+        especie: 'Gato',
+        raza: 'Siamés',
+        ubicacion: 'Guayaquil, Samborondón',
+        ciudad: 'Guayaquil',
+        sector: 'Samborondón',
+        latitud: -2.1350,
+        longitud: -79.8687,
         estado: 'PUBLICO',
-        usuarioId: user.id
-      },
-      {
-        mascota: 'Rocky - Beagle',
-        ubicacion: 'Cuenca - Centro Histórico',
-        estado: 'PUBLICO',
+        tipoAlerta: 'ENCONTRADO',
+        telefonoPrincipal: '0987654321',
+        descripcion: 'Encontrada con collar rosado sin placa.',
+        tamano: 'Pequeño',
+        sexo: 'Hembra',
+        color: 'Blanco y Crema',
         usuarioId: user.id
       }
     ]);
