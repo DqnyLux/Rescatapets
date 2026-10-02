@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>RescataPet EC - Icon Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui, sans-serif; color: #ccc; gap: 20px; }
+  canvas { border: 1px solid #333; border-radius: 12px; }
+  .info { font-size: 14px; opacity: 0.7; }
+  button { padding: 10px 24px; background: #F97316; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; }
+  button:hover { background: #EA580C; }
+</style>
+</head>
+<body>
+
+<h2>RescataPet EC - App Icon (512x512)</h2>
+<canvas id="icon" width="512" height="512"></canvas>
+<p class="info">Right-click the canvas and "Save image as..." to get a PNG, or use the button below.</p>
+<button onclick="downloadPNG()">Download PNG</button>
+
+<script>
+const canvas = document.getElementById('icon');
+const ctx = canvas.getContext('2d');
+const W = 512;
+
+function drawIcon() {
+  // --- Background: rounded rect with orange gradient ---
+  const r = 108;
+  const grad = ctx.createLinearGradient(0, 0, W, W);
+  grad.addColorStop(0, '#FB923C');
+  grad.addColorStop(1, '#EA580C');
+
+  ctx.beginPath();
+  roundRect(ctx, 0, 0, W, W, r);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // --- Subtle rescue cross behind paw ---
+  ctx.save();
+  ctx.translate(256, 290);
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = '#FFFFFF';
+  roundRect(ctx, -90, -30, 180, 60, 8); ctx.fill();
+  ctx.beginPath();
+  roundRect(ctx, -30, -90, 60, 180, 8); ctx.fill();
+  ctx.restore();
+
+  // --- Paw print (white) ---
+  ctx.save();
+  ctx.translate(256, 240);
+  ctx.fillStyle = '#FFFFFF';
+
+  // Main pad
+  ellipse(ctx, 0, 52, 62, 50);
+
+  // Top-left toe
+  ctx.save(); ctx.translate(-58, -18); ctx.rotate(-12 * Math.PI / 180);
+  ellipse(ctx, 0, 0, 28, 34); ctx.restore();
+
+  // Top-right toe
+  ctx.save(); ctx.translate(58, -18); ctx.rotate(12 * Math.PI / 180);
+  ellipse(ctx, 0, 0, 28, 34); ctx.restore();
+
+  // Inner-left toe
+  ctx.save(); ctx.translate(-22, -52); ctx.rotate(-5 * Math.PI / 180);
+  ellipse(ctx, 0, 0, 24, 30); ctx.restore();
+
+  // Inner-right toe
+  ctx.save(); ctx.translate(22, -52); ctx.rotate(5 * Math.PI / 180);
+  ellipse(ctx, 0, 0, 24, 30); ctx.restore();
+
+  ctx.restore();
+
+  // --- Location pin (bottom-right) ---
+  ctx.save();
+  ctx.translate(340, 350);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.globalAlpha = 0.92;
+  ctx.beginPath();
+  ctx.moveTo(0, -28);
+  ctx.bezierCurveTo(-16, -28, -28, -16, -28, 0);
+  ctx.bezierCurveTo(-28, 16, 0, 36, 0, 36);
+  ctx.bezierCurveTo(0, 36, 28, 16, 28, 0);
+  ctx.bezierCurveTo(28, -16, 16, -28, 0, -28);
+  ctx.closePath();
+  ctx.fill();
+
+  // Pin dot
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#EA580C';
+  ctx.beginPath();
+  ctx.arc(0, -2, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // --- "RESCATA" text at bottom ---
+  ctx.save();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.globalAlpha = 0.95;
+  ctx.font = '800 42px Arial, Helvetica, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('RESCATA', 256, 455);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function ellipse(ctx, cx, cy, rx, ry) {
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+drawIcon();
+
+function downloadPNG() {
+  const link = document.createElement('a');
+  link.download = 'rescatapet_icon_512.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>

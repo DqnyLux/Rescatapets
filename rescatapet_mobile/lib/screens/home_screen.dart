@@ -1658,11 +1658,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             final resultado = await NativeLocationService.obtenerPosicionActual(context);
                             if (resultado.estado == EstadoPermisoNativo.concedido && resultado.posicion != null) {
                               final pos = resultado.posicion!;
+                              final dir = resultado.direccion;
                               setModalState(() {
                                 latitudReporte = pos.latitude;
                                 longitudReporte = pos.longitude;
                                 esGpsPersonalizado = true;
-                                sectorCtrl.text = 'GPS Exacto: ${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}';
+                                if (dir != null && dir.calle.isNotEmpty) {
+                                  sectorCtrl.text = '${dir.calle}, ${dir.barrio}'.trim();
+                                  if (sectorCtrl.text.endsWith(',')) {
+                                    sectorCtrl.text = sectorCtrl.text.substring(0, sectorCtrl.text.length - 1);
+                                  }
+                                } else if (dir != null && dir.direccionCompleta.isNotEmpty) {
+                                  sectorCtrl.text = dir.direccionCompleta.split(',').first;
+                                } else {
+                                  sectorCtrl.text = 'GPS Exacto: ${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}';
+                                }
                               });
                             }
                           },
