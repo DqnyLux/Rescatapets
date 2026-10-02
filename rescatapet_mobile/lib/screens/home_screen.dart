@@ -6,7 +6,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/geografia.dart';
+import '../screens/legal_screen.dart';
 import '../models/reporte.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
@@ -970,17 +972,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     icono: Icons.chat_rounded,
                     color: AppTheme.successGreen,
                     accionLabel: 'Abrir Chat',
-                    onTap: () {
+                    onTap: () async {
                       final mensaje =
                           'Hola, vi el reporte de ${reporte.mascota} (${reporte.tipoAlerta.label}) en RescataPet EC en ${reporte.ubicacion}. Tengo información relevante:';
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Mensaje WhatsApp preparado:\n"$mensaje"'),
-                          backgroundColor: AppTheme.successGreen,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+
+                      String numerolimpio = (reporte.telefonoSecundario ?? reporte.telefonoPrincipal).replaceAll(RegExp(r'\D'), '');
+                      if (!numerolimpio.startsWith('593')) {
+                        if (numerolimpio.startsWith('0')) {
+                           numerolimpio = '593${numerolimpio.substring(1)}';
+                        } else {
+                           numerolimpio = '593$numerolimpio';
+                        }
+                      }
+
+                      final Uri url = Uri.parse('https://wa.me/$numerolimpio?text=${Uri.encodeComponent(mensaje)}');
+                      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo abrir WhatsApp')));
+                        }
+                      }
                     },
                   ),
                   const SizedBox(height: 10),
@@ -993,15 +1003,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     icono: Icons.phone_in_talk_rounded,
                     color: AppTheme.primary,
                     accionLabel: 'Llamar',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Marcando a ${reporte.telefonoPrincipal}...'),
-                          backgroundColor: AppTheme.primary,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                    onTap: () async {
+                      final Uri telUrl = Uri.parse('tel:${reporte.telefonoPrincipal}');
+                      if (!await launchUrl(telUrl)) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo iniciar la llamada')));
+                        }
+                      }
                     },
                   ),
                   const SizedBox(height: 10),
@@ -2795,17 +2803,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       // Botón WhatsApp rápido
                       IconButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final mensaje =
                               'Hola, vi el reporte de ${reporte.mascota} (${reporte.tipoAlerta.label}) en RescataPet EC. ¿Sigue el caso activo?';
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Mensaje preparado para ${reporte.mascota}:\n"$mensaje"'),
-                              backgroundColor: AppTheme.successGreen,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                          );
+                          String num = reporte.telefonoPrincipal.replaceAll(RegExp(r'\D'), '');
+                          if (!num.startsWith('593')) {
+                            num = num.startsWith('0') ? '593${num.substring(1)}' : '593$num';
+                          }
+                          await launchUrl(Uri.parse('https://wa.me/$num?text=${Uri.encodeComponent(mensaje)}'), mode: LaunchMode.externalApplication);
                         },
                         icon: const Icon(Icons.chat_rounded, color: AppTheme.successGreen, size: 20),
                         tooltip: 'Contactar por WhatsApp',
@@ -3051,13 +3056,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Llamando a ${refugio['nombre']} (${refugio['telefono']})...'),
-                                backgroundColor: AppTheme.primary,
-                              ),
-                            );
+                          onPressed: () async {
+                            await launchUrl(Uri.parse('tel:${refugio['telefono']}'));
                           },
                           icon: const Icon(Icons.call_rounded, size: 16),
                           label: const Text('Llamar'),
@@ -3070,13 +3070,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Abriendo WhatsApp con ${refugio['nombre']}...'),
-                                backgroundColor: AppTheme.successGreen,
-                              ),
-                            );
+                          onPressed: () async {
+                            String num = (refugio['telefono'] as String).replaceAll(RegExp(r'\D'), '');
+                            if (!num.startsWith('593')) {
+                              num = num.startsWith('0') ? '593${num.substring(1)}' : '593$num';
+                            }
+                            await launchUrl(Uri.parse('https://wa.me/$num?text=${Uri.encodeComponent('Hola ${refugio['nombre']}, contacto desde RescataPet EC.')}'), mode: LaunchMode.externalApplication);
                           },
                           icon: const Icon(Icons.chat_rounded, size: 16),
                           label: const Text('WhatsApp'),
@@ -3161,13 +3160,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.12),
+                    color: AppTheme.successGreen.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    '🛡️ Miembro Rescatista Verificado EC',
+                    '✓ Cuenta activa',
                     style: TextStyle(
-                      color: AppTheme.primaryLight,
+                      color: AppTheme.successGreen,
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                     ),
@@ -3222,27 +3221,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(height: 10),
 
-        // API Status Tile
+        // Políticas y Términos Legales
         Card(
           child: ListTile(
-            leading: const Icon(Icons.storage_rounded, color: AppTheme.primaryLight),
-            title: const Text('Estado de la Red & Backend', style: TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: const Text('Node.js REST API + SQLite Conectado'),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppTheme.successGreen.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Text(
-                'ONLINE',
-                style: TextStyle(
-                  color: AppTheme.successGreen,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 11,
-                ),
-              ),
-            ),
+            leading: const Icon(Icons.policy_rounded, color: AppTheme.primaryLight),
+            title: const Text('Políticas y Términos de Uso', style: TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: const Text('Privacidad, condiciones y licencia'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const LegalScreen()));
+            },
           ),
         ),
         const SizedBox(height: 10),
