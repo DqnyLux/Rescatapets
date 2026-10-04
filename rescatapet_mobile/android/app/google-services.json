@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "412098918959",
+    "project_id": "rescatapets",
+    "storage_bucket": "rescatapets.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412098918959:android:f3dafdb5097e92be7ee4da",
+        "android_client_info": {
+          "package_name": "com.example.rescatapet_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "412098918959-qkr0n6pnkorg0cnuo89i5hnbniivmhtr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rescatapet_mobile",
+            "certificate_hash": "6918ad8d74c1b07e832fadcaa5150ac4ac7fea16"
+          }
+        },
+        {
+          "client_id": "412098918959-hnapjmh5t1prmsj5jnfj4aa7etleq1k6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAIQdi6CZIifC4VUdBMAj-f-PBcrFMPgg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "412098918959-hnapjmh5t1prmsj5jnfj4aa7etleq1k6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

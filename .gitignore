@@ -1,0 +1,45 @@
+node_modules/
+npm-debug.log
+.env
+.DS_Store
+*.sqlite
+*.sqlite-journal
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Flutter/Dart
+rescatapet_mobile/build/
+rescatapet_mobile/.dart_tool/
+rescatapet_mobile/.flutter-plugins
+rescatapet_mobile/.flutter-plugins-dependencies
+rescatapet_mobile/.packages
+rescatapet_mobile/.pub-cache/
+rescatapet_mobile/.pub/
+
+# Android
+rescatapet_mobile/android/local.properties
+rescatapet_mobile/android/.gradle/
+rescatapet_mobile/android/app/build/
+
+# iOS
+rescatapet_mobile/ios/.generated/
+rescatapet_mobile/ios/Flutter/App.framework
+rescatapet_mobile/ios/Flutter/Flutter.framework
+rescatapet_mobile/ios/Flutter/Flutter.podspec
+rescatapet_mobile/ios/Flutter/Generated.xcconfig
+rescatapet_mobile/ios/Flutter/app.flx
+rescatapet_mobile/ios/Flutter/app.zip
+rescatapet_mobile/ios/Flutter/flutter_assets/
+rescatapet_mobile/ios/Pods/
+rescatapet_mobile/ios/Runner.xcworkspace/xcuserdata
+
+# Desktop
+rescatapet_mobile/macos/Flutter/GeneratedPluginRegistrant.swift
+rescatapet_mobile/macos/Flutter/ephemeral/
+rescatapet_mobile/windows/flutter/ephemeral/
+rescatapet_mobile/linux/flutter/ephemeral/
+
+# AI configs (just in case)
+.claude/
+.cline/
+.aider/
